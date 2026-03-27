@@ -1,11 +1,30 @@
 const express = require('express');
 const path = require('path');
 const Database = require('better-sqlite3');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const db = new Database('./eventiq.db');
+// Use DATABASE_URL env var, or /data if it exists, or fall back to local
+let dbPath;
+if (process.env.DATABASE_URL) {
+  dbPath = process.env.DATABASE_URL;
+} else if (fs.existsSync('/data')) {
+  dbPath = '/data/eventiq.db';
+} else {
+  dbPath = path.join(__dirname, 'eventiq.db');
+}
+
+// Make sure the directory exists
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
+}
+
+console.log(`Using database at: ${dbPath}`);
+
+const db = new Database(dbPath);
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS events (
@@ -96,4 +115,4 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => console.log(`EventIQ running on port ${PORT}`));
+app.listen(PORT, () => console.log(`EventIQ running on port ${PORT}, DB: ${dbPath}`));

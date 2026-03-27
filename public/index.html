@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventIQ – SportPesa Event Management</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green: #00A651;
+      --navy: #1A3A6B;
+      --dark: #0A1628;
+      --gold: #F5A623;
+      --mid: #132238;
+      --light: #e8eef8;
+      --text: #0A1628;
+      --muted: #6b7c93;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+    body { font-family: 'DM Sans', sans-serif; background: #f0f4f2; color: var(--text); min-height: 100vh; }
+    .app { min-height: 100vh; }
+    .nav { background: var(--dark); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+    .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: white; letter-spacing: 2px; }
+    .nav-logo span { color: var(--navy); }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .nav-user { font-size: 13px; color: rgba(255,255,255,0.6); }
+    .nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all .2s; }
+    .nav-btn:hover { background: rgba(255,255,255,0.1); }
+    .login-page { min-height: 100vh; background: var(--dark); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .login-card { background: white; border-radius: 20px; padding: 48px 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+    .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--dark); letter-spacing: 3px; text-align: center; margin-bottom: 4px; }
+    .login-logo span { color: var(--navy); }
+    .login-sub { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 36px; letter-spacing: 0.5px; }
+    .login-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+    .login-input { width: 100%; padding: 13px 16px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border .2s; outline: none; margin-bottom: 20px; }
+    .login-input:focus { border-color: var(--navy); }
+    .login-btn { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .2s; letter-spacing: 0.5px; }
+    .login-btn:hover { background: #142d56; transform: translateY(-1px); }
+    .login-err { background: #fff0f0; border: 1px solid #ffcdd2; color: #c62828; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--dark); margin-bottom: 4px; }
+    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
+    .tabs { display: flex; gap: 4px; background: white; padding: 4px; border-radius: 12px; width: fit-content; margin-bottom: 32px; box-shadow: var(--shadow); }
+    .tab { padding: 9px 22px; border-radius: 9px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .2s; }
+    .tab.active { background: var(--navy); color: white; }
+    .card { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--dark); }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .form-full { grid-column: 1 / -1; }
+    .field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+    .field input, .field textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e8e8e8; border-radius: 9px; font-size: 14px; font-family: 'DM Sans', sans-serif; transition: border .2s; outline: none; resize: vertical; }
+    .field input:focus, .field textarea:focus { border-color: var(--navy); }
+    .btn-primary { background: var(--navy); color: white; border: none; padding: 13px 28px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
+    .btn-primary:hover { background: #142d56; transform: translateY(-1px); }
+    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+    .btn-outline { background: transparent; color: var(--dark); border: 1.5px solid #ddd; padding: 13px 28px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
+    .btn-outline:hover { border-color: var(--dark); }
+    .event-list { display: grid; gap: 16px; }
+    .event-card { background: white; border-radius: var(--radius); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); cursor: pointer; transition: all .2s; border: 1.5px solid transparent; }
+    .event-card:hover { border-color: var(--navy); transform: translateY(-2px); }
+    .event-card.selected { border-color: var(--navy); background: var(--light); }
+    .event-name { font-size: 16px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
+    .event-meta { font-size: 13px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
+    .event-badge { background: var(--light); color: var(--navy); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .reg-count { background: var(--gold); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .qr-panel { background: white; border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .qr-event-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--dark); text-align: center; }
+    .qr-wrap { padding: 16px; background: white; border-radius: 12px; border: 2px solid var(--light); }
+    .qr-url { font-size: 11px; color: var(--muted); word-break: break-all; text-align: center; max-width: 220px; }
+    .btn-download { background: var(--dark); color: white; border: none; padding: 11px 24px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
+    .btn-download:hover { background: #1a2f4a; }
+    .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+    .reg-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .reg-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; }
+    .reg-table td { padding: 12px 14px; border-bottom: 1px solid #f8f8f8; color: var(--dark); }
+    .reg-table tr:last-child td { border-bottom: none; }
+    .sms-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .sms-badge.sent { background: #e8eef8; color: var(--navy); }
+    .sms-badge.pending { background: #fff8e6; color: #b8860b; }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: white; border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--dark); line-height: 1; }
+    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .stat-card.navy .stat-num { color: var(--navy); }
+    .stat-card.gold .stat-num { color: var(--gold); }
+    .attend-page { min-height: 100vh; background: linear-gradient(160deg, #0A1628 0%, #132238 60%, #0A1628 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .attend-card { background: white; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 440px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
+    .attend-brand { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--dark); letter-spacing: 2px; text-align: center; }
+    .attend-brand span { color: var(--green); }
+    .attend-event { background: var(--light); border-left: 4px solid var(--navy); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0 24px; }
+    .attend-event-name { font-weight: 700; font-size: 16px; color: var(--dark); }
+    .attend-event-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .attend-intro { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .attend-input { width: 100%; padding: 13px 16px; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border .2s; outline: none; margin-bottom: 14px; }
+    .attend-input:focus { border-color: var(--navy); }
+    .attend-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
+    .check-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; cursor: pointer; }
+    .check-row input { margin-top: 2px; accent-color: var(--navy); width: 16px; height: 16px; flex-shrink: 0; }
+    .check-row span { font-size: 13px; color: var(--dark); line-height: 1.5; }
+    .attend-btn { width: 100%; padding: 16px; background: var(--navy); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .2s; margin-top: 8px; letter-spacing: 0.5px; }
+    .attend-btn:hover { background: #142d56; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,58,107,0.3); }
+    .attend-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    .success-page { min-height: 100vh; background: linear-gradient(160deg, #0A1628 0%, #132238 60%, #0A1628 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .success-card { background: white; border-radius: 20px; padding: 48px 36px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
+    .success-icon { font-size: 60px; margin-bottom: 16px; }
+    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--dark); margin-bottom: 8px; }
+    .success-msg { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+    .success-prize { background: linear-gradient(135deg, var(--dark), #132238); color: white; border-radius: 14px; padding: 20px; }
+    .success-prize-label { font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .success-prize-text { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .modal-card { background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .sms-preview { background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px; font-size: 14px; color: var(--dark); line-height: 1.6; margin-bottom: 20px; white-space: pre-line; }
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+    .empty { text-align: center; padding: 60px 24px; }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-text { font-size: 15px; color: var(--muted); }
+    .del-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #ccc; padding: 4px; }
+    .del-btn:hover { color: #e53935; }
+    @media (max-width: 700px) {
+      .two-col { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .main { padding: 20px 16px; }
+      .attend-card { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const AUTHORIZED_USERS = [
+      { email: "dean.delaney@sportpesa.co.za", mobile: "0828975847" },
+    ];
+
+    const getEvents = () => JSON.parse(localStorage.getItem("eq_events") || "[]");
+    const saveEvents = (e) => localStorage.setItem("eq_events", JSON.stringify(e));
+    const getRegs = () => JSON.parse(localStorage.getItem("eq_regs") || "[]");
+    const saveRegs = (r) => localStorage.setItem("eq_regs", JSON.stringify(r));
+
+    // ── QR Code Component ──
+    function QRDisplay({ url, eventName }) {
+      const ref = useRef(null);
+      const id = "qr-" + (eventName || "").replace(/\s/g, "");
+
+      useEffect(() => {
+        if (!url || !ref.current) return;
+        ref.current.innerHTML = "";
+        new QRCode(ref.current, {
+          text: url,
+          width: 190,
+          height: 190,
+          colorDark: "#0A1628",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
+      }, [url]);
+
+      const download = () => {
+        const canvas = ref.current && ref.current.querySelector("canvas");
+        if (canvas) {
+          const a = document.createElement("a");
+          a.download = `EventIQ-${eventName}.png`;
+          a.href = canvas.toDataURL();
+          a.click();
+        }
+      };
+
+      return (
+        <div className="qr-panel">
+          <div className="qr-event-name">{eventName}</div>
+          <div className="qr-wrap">
+            <div ref={ref} id={id} />
+          </div>
+          <div className="qr-url">{url}</div>
+          <button className="btn-download" onClick={download}>⬇ Download QR Code</button>
+          <p style={{fontSize:11,color:"#999",textAlign:"center"}}>Share this QR with your event promoters</p>
+        </div>
+      );
+    }
+
+    // ── SMS Modal ──
+    function SMSModal({ reg, event, onClose }) {
+      const [sent, setSent] = useState(false);
+      const msg = `Hi ${reg.fullName.split(" ")[0]}! 🎉 Thank you for attending the ${event.name} SportPesa event. Complete your registration at https://www.sportpesa.co.za/join and make a deposit to stand a chance to win ${event.prize || "our Grand Prize"}! T&Cs apply. 18+`;
+
+      const handleSend = () => {
+        const regs = getRegs();
+        const idx = regs.findIndex(r => r.id === reg.id);
+        if (idx > -1) { regs[idx].smsSent = true; saveRegs(regs); }
+        setSent(true);
+        setTimeout(onClose, 1500);
+      };
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="modal-title">📱 Send Follow-Up SMS</div>
+            <div className="modal-sub">To: {reg.mobile} · {reg.fullName}</div>
+            <div className="sms-preview">{msg}</div>
+            {sent ? (
+              <p style={{color:"#1A3A6B",fontWeight:600,textAlign:"center"}}>✓ SMS marked as sent!</p>
+            ) : (
+              <div className="modal-actions">
+                <button className="btn-outline" onClick={onClose}>Cancel</button>
+                <button className="btn-primary" onClick={handleSend}>Send SMS</button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Admin App ──
+    function AdminApp({ user, onLogout }) {
+      const [tab, setTab] = useState("events");
+      const [events, setEvents] = useState(getEvents());
+      const [regs, setRegs] = useState(getRegs());
+      const [selectedEvent, setSelectedEvent] = useState(null);
+      const [form, setForm] = useState({ name: "", date: "", venue: "", details: "", prize: "" });
+      const [smsTarget, setSmsTarget] = useState(null);
+
+      const refresh = () => { setEvents(getEvents()); setRegs(getRegs()); };
+
+      const createEvent = () => {
+        if (!form.name || !form.date) return;
+        const ev = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          ...form,
+          createdBy: user.email,
+          createdAt: new Date().toISOString(),
+        };
+        const updated = [...getEvents(), ev];
+        saveEvents(updated);
+        setEvents(updated);
+        setSelectedEvent(ev);
+        setForm({ name: "", date: "", venue: "", details: "", prize: "" });
+        setTab("events");
+      };
+
+      const deleteEvent = (id) => {
+        if (!window.confirm("Delete this event?")) return;
+        const updated = getEvents().filter(e => e.id !== id);
+        saveEvents(updated);
+        setEvents(updated);
+        if (selectedEvent?.id === id) setSelectedEvent(null);
+      };
+
+      const getRegUrl = (evId) => `${window.location.href.split("?")[0]}?event=${evId}`;
+      const eventRegs = (evId) => regs.filter(r => r.eventId === evId);
+      const smsSentCount = regs.filter(r => r.smsSent).length;
+
+      return (
+        <div className="app">
+          <nav className="nav">
+            <span className="nav-logo">Event<span>IQ</span></span>
+            <div className="nav-right">
+              <span className="nav-user">👤 {user.email}</span>
+              <button className="nav-btn" onClick={onLogout}>Log Out</button>
+            </div>
+          </nav>
+
+          <div className="main">
+            <div className="page-title">Event Dashboard</div>
+            <div className="page-sub">Manage events, QR codes and attendee registrations</div>
+
+            <div className="stats-row">
+              <div className="stat-card">
+                <div className="stat-num">{events.length}</div>
+                <div className="stat-label">Active Events</div>
+              </div>
+              <div className="stat-card navy">
+                <div className="stat-num">{regs.length}</div>
+                <div className="stat-label">Total Registrations</div>
+              </div>
+              <div className="stat-card gold">
+                <div className="stat-num">{smsSentCount}</div>
+                <div className="stat-label">SMS Sent</div>
+              </div>
+            </div>
+
+            <div className="tabs">
+              <button className={`tab ${tab === "events" ? "active" : ""}`} onClick={() => setTab("events")}>Events & QR Codes</button>
+              <button className={`tab ${tab === "registrations" ? "active" : ""}`} onClick={() => { setTab("registrations"); refresh(); }}>Registrations</button>
+              <button className={`tab ${tab === "create" ? "active" : ""}`} onClick={() => setTab("create")}>+ New Event</button>
+            </div>
+
+            {tab === "events" && (
+              <div className="two-col">
+                <div>
+                  <div className="card-title">Your Events</div>
+                  {events.length === 0 ? (
+                    <div className="card">
+                      <div className="empty">
+                        <div className="empty-icon">📅</div>
+                        <div className="empty-text">No events yet. Click "+ New Event" to get started.</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="event-list">
+                      {events.map(ev => (
+                        <div key={ev.id} className={`event-card ${selectedEvent?.id === ev.id ? "selected" : ""}`} onClick={() => setSelectedEvent(ev)}>
+                          <div>
+                            <div className="event-name">{ev.name}</div>
+                            <div className="event-meta">
+                              <span>📅 {new Date(ev.date + "T12:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</span>
+                              {ev.venue && <span>📍 {ev.venue}</span>}
+                            </div>
+                          </div>
+                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                            <span className="reg-count">{eventRegs(ev.id).length} regs</span>
+                            <span className="event-badge">Active</span>
+                            <button className="del-btn" onClick={e => { e.stopPropagation(); deleteEvent(ev.id); }} title="Delete event">🗑</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div>
+                  {selectedEvent ? (
+                    <QRDisplay url={getRegUrl(selectedEvent.id)} eventName={selectedEvent.name} />
+                  ) : (
+                    <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
+                      <div style={{ fontSize: 40, marginBottom: 12 }}>👆</div>
+                      <div style={{ fontSize: 14, color: "var(--muted)" }}>Select an event to view its QR code</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {tab === "create" && (
+              <div className="card">
+                <div className="card-title">Create New Event</div>
+                <div className="form-grid">
+                  <div className="field">
+                    <label>Event Name *</label>
+                    <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. PSL Matchday Activation" />
+                  </div>
+                  <div className="field">
+                    <label>Event Date *</label>
+                    <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
+                  </div>
+                  <div className="field">
+                    <label>Venue</label>
+                    <input value={form.venue} onChange={e => setForm({ ...form, venue: e.target.value })} placeholder="e.g. FNB Stadium, Johannesburg" />
+                  </div>
+                  <div className="field">
+                    <label>Grand Prize (for SMS follow-up)</label>
+                    <input value={form.prize} onChange={e => setForm({ ...form, prize: e.target.value })} placeholder="e.g. a R10,000 cash prize" />
+                  </div>
+                  <div className="field form-full">
+                    <label>Event Details</label>
+                    <textarea rows={3} value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} placeholder="Additional context shown to attendees during registration..." />
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+                  <button className="btn-primary" onClick={createEvent} disabled={!form.name || !form.date}>Create Event & Generate QR</button>
+                  <button className="btn-outline" onClick={() => { setTab("events"); setForm({ name: "", date: "", venue: "", details: "", prize: "" }); }}>Cancel</button>
+                </div>
+              </div>
+            )}
+
+            {tab === "registrations" && (
+              <div className="card">
+                <div className="card-title">All Registrations</div>
+                {regs.length === 0 ? (
+                  <div className="empty">
+                    <div className="empty-icon">📋</div>
+                    <div className="empty-text">No registrations yet. Share your event QR codes to start capturing leads.</div>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: "auto" }}>
+                    <table className="reg-table">
+                      <thead>
+                        <tr>
+                          <th>Full Name</th>
+                          <th>Mobile</th>
+                          <th>Event</th>
+                          <th>Registered</th>
+                          <th>Marketing</th>
+                          <th>SMS</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[...regs].reverse().map(r => {
+                          const ev = events.find(e => e.id === r.eventId);
+                          return (
+                            <tr key={r.id}>
+                              <td style={{ fontWeight: 500 }}>{r.fullName}</td>
+                              <td>{r.mobile}</td>
+                              <td>{ev?.name || "—"}</td>
+                              <td style={{ color: "var(--muted)", fontSize: 13 }}>
+                                {new Date(r.createdAt).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                              </td>
+                              <td style={{ fontSize: 13 }}>{r.marketingOptIn ? "✓ Yes" : "—"}</td>
+                              <td>
+                                <span className={`sms-badge ${r.smsSent ? "sent" : "pending"}`}>
+                                  {r.smsSent ? "✓ Sent" : "⏳ Pending"}
+                                </span>
+                              </td>
+                              <td>
+                                {!r.smsSent && ev && (
+                                  <button style={{ background: "none", border: "none", color: "#1A3A6B", cursor: "pointer", fontSize: 13, fontWeight: 600 }} onClick={() => setSmsTarget({ reg: r, event: ev })}>
+                                    Send SMS
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {smsTarget && (
+            <SMSModal
+              reg={smsTarget.reg}
+              event={smsTarget.event}
+              onClose={() => { setSmsTarget(null); refresh(); }}
+            />
+          )}
+        </div>
+      );
+    }
+
+    // ── Attendee Page ──
+    function AttendeePage({ eventId }) {
+      const events = getEvents();
+      const event = events.find(e => e.id === eventId);
+      const [form, setForm] = useState({ fullName: "", mobile: "" });
+      const [checks, setChecks] = useState({ age: false, tcs: false, marketing: false });
+      const [submitted, setSubmitted] = useState(false);
+      const [error, setError] = useState("");
+
+      const canSubmit = form.fullName.trim() && form.mobile.trim().length >= 10 && checks.age && checks.tcs;
+
+      const handleSubmit = () => {
+        if (!canSubmit) { setError("Please fill in all fields and accept the required terms."); return; }
+        const reg = {
+          id: Date.now().toString(36),
+          eventId,
+          fullName: form.fullName.trim(),
+          mobile: form.mobile.trim(),
+          marketingOptIn: checks.marketing,
+          createdAt: new Date().toISOString(),
+          smsSent: false,
+        };
+        saveRegs([...getRegs(), reg]);
+        setSubmitted(true);
+      };
+
+      if (!event) return (
+        <div className="attend-page">
+          <div className="attend-card" style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
+            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Event Not Found</div>
+            <div style={{ fontSize: 14, color: "var(--muted)" }}>This QR code may be invalid or the event has ended.</div>
+          </div>
+        </div>
+      );
+
+      if (submitted) return (
+        <div className="success-page">
+          <div className="success-card">
+            <div className="success-icon">🎉</div>
+            <div className="success-title">You're In!</div>
+            <div className="success-msg">
+              Thank you, <strong>{form.fullName.split(" ")[0]}</strong>! Your details have been captured. You'll receive an SMS with instructions to complete your SportPesa registration.
+            </div>
+            {event.prize && (
+              <div className="success-prize">
+                <div className="success-prize-label">🏆 Grand Prize</div>
+                <div className="success-prize-text">
+                  Complete your registration at sportpesa.co.za and make a deposit to stand a chance to win <strong>{event.prize}</strong>!
+                </div>
+              </div>
+            )}
+            <div style={{ marginTop: 20, fontSize: 13, color: "var(--muted)" }}>You may now collect your merchandise from the promoter 🙌</div>
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="attend-page">
+          <div className="attend-card">
+            <div className="attend-brand">Sport<span>Pesa</span></div>
+            <div style={{ textAlign: "center", fontSize: 11, color: "var(--muted)", marginBottom: 4, letterSpacing: 1 }}>POWERED BY EVENTIQ</div>
+
+            <div className="attend-event">
+              <div className="attend-event-name">{event.name}</div>
+              <div className="attend-event-meta">
+                📅 {new Date(event.date + "T12:00:00").toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                {event.venue && <span> · 📍 {event.venue}</span>}
+              </div>
+            </div>
+
+            <p className="attend-intro">Register your interest in joining SportPesa and stand a chance to win exciting prizes. Takes less than 30 seconds!</p>
+
+            {error && <div className="login-err">{error}</div>}
+
+            <label className="attend-label">Full Name</label>
+            <input className="attend-input" placeholder="e.g. Thabo Nkosi" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} />
+
+            <label className="attend-label">Mobile Number</label>
+            <input className="attend-input" placeholder="e.g. 0821234567" type="tel" value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value })} />
+
+            <label className="check-row">
+              <input type="checkbox" checked={checks.age} onChange={e => setChecks({ ...checks, age: e.target.checked })} />
+              <span>I confirm I am <strong>18 years of age or older</strong> *</span>
+            </label>
+            <label className="check-row">
+              <input type="checkbox" checked={checks.tcs} onChange={e => setChecks({ ...checks, tcs: e.target.checked })} />
+              <span>I accept the <strong>SportPesa Terms & Conditions</strong> *</span>
+            </label>
+            <label className="check-row">
+              <input type="checkbox" checked={checks.marketing} onChange={e => setChecks({ ...checks, marketing: e.target.checked })} />
+              <span>I agree to receive <strong>marketing communications</strong> from SportPesa (optional)</span>
+            </label>
+
+            <button className="attend-btn" onClick={handleSubmit} disabled={!canSubmit}>
+              Register My Interest →
+            </button>
+
+            <p style={{ fontSize: 11, color: "var(--muted)", textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
+              Your details are used only for SportPesa registration follow-up. 18+ only. Please gamble responsibly.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Login Page ──
+    function LoginPage({ onLogin }) {
+      const [email, setEmail] = useState("");
+      const [mobile, setMobile] = useState("");
+      const [error, setError] = useState("");
+
+      const handleLogin = () => {
+        const match = AUTHORIZED_USERS.find(
+          u => u.email.toLowerCase() === email.toLowerCase().trim() && u.mobile === mobile.trim()
+        );
+        if (match) { onLogin({ email: match.email }); }
+        else { setError("Invalid credentials. Please check your email and mobile number."); }
+      };
+
+      return (
+        <div className="login-page">
+          <div className="login-card">
+            <div className="login-logo">Event<span>IQ</span></div>
+            <div className="login-sub">SPORTPESA EVENT MANAGEMENT PLATFORM</div>
+            {error && <div className="login-err">{error}</div>}
+            <label className="login-label">Email Address</label>
+            <input className="login-input" type="email" placeholder="you@sportpesa.co.za" value={email} onChange={e => { setEmail(e.target.value); setError(""); }} onKeyDown={e => e.key === "Enter" && handleLogin()} />
+            <label className="login-label">Mobile Number</label>
+            <input className="login-input" type="tel" placeholder="e.g. 0821234567" value={mobile} onChange={e => { setMobile(e.target.value); setError(""); }} onKeyDown={e => e.key === "Enter" && handleLogin()} />
+            <button className="login-btn" onClick={handleLogin}>Sign In</button>
+            <p style={{ textAlign: "center", fontSize: 12, color: "#aaa", marginTop: 20 }}>Access restricted to authorised SportPesa team members only</p>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Root ──
+    function EventIQ() {
+      const [user, setUser] = useState(() => {
+        try { return JSON.parse(sessionStorage.getItem("eq_user")); } catch { return null; }
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      const eventParam = params.get("event");
+
+      const handleLogin = (u) => { sessionStorage.setItem("eq_user", JSON.stringify(u)); setUser(u); };
+      const handleLogout = () => { sessionStorage.removeItem("eq_user"); setUser(null); };
+
+      if (eventParam) return <AttendeePage eventId={eventParam} />;
+      if (user) return <AdminApp user={user} onLogout={handleLogout} />;
+      return <LoginPage onLogin={handleLogin} />;
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<EventIQ />);
+  </script>
+</body>
+</html>

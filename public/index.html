@@ -1,602 +1,590 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EventIQ – SportPesa Event Management</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --green: #00A651;
-      --navy: #1A3A6B;
-      --dark: #0A1628;
-      --gold: #F5A623;
-      --mid: #132238;
-      --light: #e8eef8;
-      --text: #0A1628;
-      --muted: #6b7c93;
-      --radius: 14px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.10);
-    }
-    body { font-family: 'DM Sans', sans-serif; background: #f0f4f2; color: var(--text); min-height: 100vh; }
-    .app { min-height: 100vh; }
-    .nav { background: var(--dark); padding: 0 32px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: white; letter-spacing: 2px; }
-    .nav-logo span { color: var(--navy); }
-    .nav-right { display: flex; align-items: center; gap: 16px; }
-    .nav-user { font-size: 13px; color: rgba(255,255,255,0.6); }
-    .nav-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all .2s; }
-    .nav-btn:hover { background: rgba(255,255,255,0.1); }
-    .login-page { min-height: 100vh; background: var(--dark); display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .login-card { background: white; border-radius: 20px; padding: 48px 40px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
-    .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 42px; color: var(--dark); letter-spacing: 3px; text-align: center; margin-bottom: 4px; }
-    .login-logo span { color: var(--navy); }
-    .login-sub { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 36px; letter-spacing: 0.5px; }
-    .login-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
-    .login-input { width: 100%; padding: 13px 16px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border .2s; outline: none; margin-bottom: 20px; }
-    .login-input:focus { border-color: var(--navy); }
-    .login-btn { width: 100%; padding: 15px; background: var(--navy); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .2s; letter-spacing: 0.5px; }
-    .login-btn:hover { background: #142d56; transform: translateY(-1px); }
-    .login-err { background: #fff0f0; border: 1px solid #ffcdd2; color: #c62828; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
-    .main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
-    .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--dark); margin-bottom: 4px; }
-    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 32px; }
-    .tabs { display: flex; gap: 4px; background: white; padding: 4px; border-radius: 12px; width: fit-content; margin-bottom: 32px; box-shadow: var(--shadow); }
-    .tab { padding: 9px 22px; border-radius: 9px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: transparent; color: var(--muted); transition: all .2s; }
-    .tab.active { background: var(--navy); color: white; }
-    .card { background: white; border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow); }
-    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; color: var(--dark); }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .form-full { grid-column: 1 / -1; }
-    .field label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
-    .field input, .field textarea { width: 100%; padding: 12px 14px; border: 1.5px solid #e8e8e8; border-radius: 9px; font-size: 14px; font-family: 'DM Sans', sans-serif; transition: border .2s; outline: none; resize: vertical; }
-    .field input:focus, .field textarea:focus { border-color: var(--navy); }
-    .btn-primary { background: var(--navy); color: white; border: none; padding: 13px 28px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
-    .btn-primary:hover { background: #142d56; transform: translateY(-1px); }
-    .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; }
-    .btn-outline { background: transparent; color: var(--dark); border: 1.5px solid #ddd; padding: 13px 28px; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; font-family: 'DM Sans', sans-serif; }
-    .btn-outline:hover { border-color: var(--dark); }
-    .event-list { display: grid; gap: 16px; }
-    .event-card { background: white; border-radius: var(--radius); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); cursor: pointer; transition: all .2s; border: 1.5px solid transparent; }
-    .event-card:hover { border-color: var(--navy); transform: translateY(-2px); }
-    .event-card.selected { border-color: var(--navy); background: var(--light); }
-    .event-name { font-size: 16px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
-    .event-meta { font-size: 13px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; }
-    .event-badge { background: var(--light); color: var(--navy); padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .reg-count { background: var(--gold); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .qr-panel { background: white; border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 16px; }
-    .qr-event-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; color: var(--dark); text-align: center; }
-    .qr-wrap { padding: 16px; background: white; border-radius: 12px; border: 2px solid var(--light); }
-    .qr-url { font-size: 11px; color: var(--muted); word-break: break-all; text-align: center; max-width: 220px; }
-    .btn-download { background: var(--dark); color: white; border: none; padding: 11px 24px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .2s; }
-    .btn-download:hover { background: #1a2f4a; }
-    .two-col { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
-    .reg-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .reg-table th { text-align: left; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; padding: 10px 14px; border-bottom: 1px solid #f0f0f0; }
-    .reg-table td { padding: 12px 14px; border-bottom: 1px solid #f8f8f8; color: var(--dark); }
-    .reg-table tr:last-child td { border-bottom: none; }
-    .sms-badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .sms-badge.sent { background: #e8eef8; color: var(--navy); }
-    .sms-badge.pending { background: #fff8e6; color: #b8860b; }
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-    .stat-card { background: white; border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); }
-    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; color: var(--dark); line-height: 1; }
-    .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
-    .stat-card.navy .stat-num { color: var(--navy); }
-    .stat-card.gold .stat-num { color: var(--gold); }
-    .attend-page { min-height: 100vh; background: linear-gradient(160deg, #0A1628 0%, #132238 60%, #0A1628 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .attend-card { background: white; border-radius: 20px; padding: 40px 36px; width: 100%; max-width: 440px; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
-    .attend-brand { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: var(--dark); letter-spacing: 2px; text-align: center; }
-    .attend-brand span { color: var(--green); }
-    .attend-event { background: var(--light); border-left: 4px solid var(--navy); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0 24px; }
-    .attend-event-name { font-weight: 700; font-size: 16px; color: var(--dark); }
-    .attend-event-meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
-    .attend-intro { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
-    .attend-input { width: 100%; padding: 13px 16px; border: 1.5px solid #e8e8e8; border-radius: 10px; font-size: 15px; font-family: 'DM Sans', sans-serif; transition: border .2s; outline: none; margin-bottom: 14px; }
-    .attend-input:focus { border-color: var(--navy); }
-    .attend-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; display: block; }
-    .check-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; cursor: pointer; }
-    .check-row input { margin-top: 2px; accent-color: var(--navy); width: 16px; height: 16px; flex-shrink: 0; }
-    .check-row span { font-size: 13px; color: var(--dark); line-height: 1.5; }
-    .attend-btn { width: 100%; padding: 16px; background: var(--navy); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all .2s; margin-top: 8px; letter-spacing: 0.5px; }
-    .attend-btn:hover { background: #142d56; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,58,107,0.3); }
-    .attend-btn:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-    .success-page { min-height: 100vh; background: linear-gradient(160deg, #0A1628 0%, #132238 60%, #0A1628 100%); display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .success-card { background: white; border-radius: 20px; padding: 48px 36px; width: 100%; max-width: 420px; text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,0.5); }
-    .success-icon { font-size: 60px; margin-bottom: 16px; }
-    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--dark); margin-bottom: 8px; }
-    .success-msg { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
-    .success-prize { background: linear-gradient(135deg, var(--dark), #132238); color: white; border-radius: 14px; padding: 20px; }
-    .success-prize-label { font-size: 11px; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-    .success-prize-text { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.5; }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 24px; }
-    .modal-card { background: white; border-radius: 16px; padding: 32px; max-width: 500px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--dark); }
-    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-    .sms-preview { background: #f8f9fa; border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px; font-size: 14px; color: var(--dark); line-height: 1.6; margin-bottom: 20px; white-space: pre-line; }
-    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
-    .empty { text-align: center; padding: 60px 24px; }
-    .empty-icon { font-size: 48px; margin-bottom: 12px; }
-    .empty-text { font-size: 15px; color: var(--muted); }
-    .del-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: #ccc; padding: 4px; }
-    .del-btn:hover { color: #e53935; }
-    @media (max-width: 700px) {
-      .two-col { grid-template-columns: 1fr; }
-      .form-grid { grid-template-columns: 1fr; }
-      .stats-row { grid-template-columns: 1fr 1fr; }
-      .main { padding: 20px 16px; }
-      .attend-card { padding: 28px 20px; }
-    }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import * as api from "../api";
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+const TIME_LIMIT = 15;
+const TOTAL_QUESTIONS = 5;
+const MAX_SCORE = TOTAL_QUESTIONS * 100; // 500
 
-    const AUTHORIZED_USERS = [
-      { email: "dean.delaney@sportpesa.co.za", mobile: "0828975847" },
-    ];
+const CAT = {
+  "SA Rugby":{bg:"#1a3a1a",text:"#4ade80",e:"🏉"},"SA Cricket":{bg:"#1a3a2a",text:"#34d399",e:"🏏"},
+  "SA Football":{bg:"#3a3a1a",text:"#fbbf24",e:"⚽"},"Formula 1":{bg:"#3a1a1a",text:"#f87171",e:"🏎️"},
+  Golf:{bg:"#1a3a2a",text:"#4ade80",e:"⛳"},Tennis:{bg:"#3a2a1a",text:"#fbbf24",e:"🎾"},
+  "Premier League":{bg:"#2a1a3a",text:"#c084fc",e:"⚽"},"Champions League":{bg:"#1a1a3a",text:"#60a5fa",e:"🏆"},
+  Olympics:{bg:"#3a2a1a",text:"#fb923c",e:"🥇"},"World Football":{bg:"#1a2a3a",text:"#38bdf8",e:"🌍"},
+};
 
-    const getEvents = () => JSON.parse(localStorage.getItem("eq_events") || "[]");
-    const saveEvents = (e) => localStorage.setItem("eq_events", JSON.stringify(e));
-    const getRegs = () => JSON.parse(localStorage.getItem("eq_regs") || "[]");
-    const saveRegs = (r) => localStorage.setItem("eq_regs", JSON.stringify(r));
+const Pill = ({cat}) => {
+  const c = CAT[cat] || {bg:"#2a2a2a",text:"#aaa",e:"🏅"};
+  return <span style={{background:c.bg,color:c.text,padding:"4px 12px",borderRadius:100,fontSize:11,fontFamily:"'JetBrains Mono',monospace",letterSpacing:.5,textTransform:"uppercase",fontWeight:600}}>{c.e} {cat}</span>;
+};
 
-    // ── QR Code Component ──
-    function QRDisplay({ url, eventName }) {
-      const ref = useRef(null);
-      const id = "qr-" + (eventName || "").replace(/\s/g, "");
+function Timer({timeLeft, max, expired}) {
+  const r = 22, circ = 2 * Math.PI * r, off = circ * (1 - timeLeft / max);
+  let col = timeLeft <= 5 ? "#ef4444" : timeLeft <= 10 ? "#f59e0b" : "#22c55e";
+  return (
+    <div style={{position:"relative",width:56,height:56,flexShrink:0}}>
+      <svg width={56} height={56} style={{transform:"rotate(-90deg)"}}>
+        <circle cx={28} cy={28} r={r} fill="none" stroke="#1a1a1e" strokeWidth={3}/>
+        <circle cx={28} cy={28} r={r} fill="none" stroke={expired?"#ef4444":col} strokeWidth={3} strokeDasharray={circ} strokeDashoffset={expired?circ:off} strokeLinecap="round" style={{transition:"stroke-dashoffset .3s linear,stroke .3s"}}/>
+      </svg>
+      <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'JetBrains Mono',monospace",fontWeight:700,fontSize:16,color:expired?"#ef4444":col,animation:timeLeft<=5&&!expired?"pulse .5s ease infinite":"none"}}>
+        {expired ? "✗" : timeLeft}
+      </div>
+    </div>
+  );
+}
 
-      useEffect(() => {
-        if (!url || !ref.current) return;
-        ref.current.innerHTML = "";
-        new QRCode(ref.current, {
-          text: url,
-          width: 190,
-          height: 190,
-          colorDark: "#0A1628",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H,
-        });
-      }, [url]);
+function ActiveQuestion({question: q, qi, total, onAnswer, timeLeft, max}) {
+  const expired = timeLeft <= 0;
+  const low = timeLeft <= 5 && timeLeft > 0;
+  const S = {mono:"'JetBrains Mono',monospace", serif:"'Playfair Display',serif"};
+  return (
+    <div style={{background:"#111113",border:`1px solid ${expired?"#4e0606":low?"#4e3a06":"#222"}`,borderRadius:16,padding:24,animation:"fadeScale .5s ease both",transition:"border-color .5s"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:20}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontFamily:S.serif,fontSize:14,color:"#fff",fontWeight:700}}>Q{qi+1}/{total}</span>
+        </div>
+        <Timer timeLeft={timeLeft} max={max} expired={expired}/>
+      </div>
+      {/* Progress dots */}
+      <div style={{display:"flex",gap:6,marginBottom:20}}>
+        {Array.from({length:total}).map((_,i) => (
+          <div key={i} style={{flex:1,height:3,borderRadius:3,background:i<qi?"#22c55e":i===qi?"#3b82f6":"#1a1a1e"}}/>
+        ))}
+      </div>
+      <p style={{fontFamily:S.serif,fontSize:20,color:"#fff",lineHeight:1.5,margin:"0 0 24px",fontWeight:500}}>{q.question}</p>
+      <div style={{display:"grid",gap:10}}>
+        {q.options.map((opt, i) => (
+          <button key={i} onClick={() => !expired && onAnswer(i)} disabled={expired}
+            style={{background:"#1a1a1e",border:"1px solid #2a2a2e",borderRadius:12,padding:"16px 18px",color:expired?"#333":"#fff",fontFamily:S.mono,fontSize:14,textAlign:"left",lineHeight:1.4,display:"flex",alignItems:"center",gap:12,transition:"all .2s",cursor:expired?"default":"pointer"}}>
+            <span style={{width:28,height:28,borderRadius:8,background:"#0d0d0f",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"#888",fontWeight:700,flexShrink:0}}>
+              {String.fromCharCode(65+i)}
+            </span>
+            {opt}
+          </button>
+        ))}
+      </div>
+      {expired && <div style={{textAlign:"center",marginTop:20,color:"#ef4444",fontSize:13,fontWeight:600,animation:"fadeScale .3s ease both"}}>⏱️ Time's up!</div>}
+    </div>
+  );
+}
 
-      const download = () => {
-        const canvas = ref.current && ref.current.querySelector("canvas");
-        if (canvas) {
-          const a = document.createElement("a");
-          a.download = `EventIQ-${eventName}.png`;
-          a.href = canvas.toDataURL();
-          a.click();
+// SCORING: <1s = 100pts, otherwise time-based
+function calcPoints(timeElapsed) {
+  if (timeElapsed === null) return 0;
+  if (timeElapsed < 1) return 100;
+  return Math.max(0, Math.round(((TIME_LIMIT - timeElapsed) / TIME_LIMIT) * 100));
+}
+
+function AnswerReveal({question: q, correctAnswer: ca, selected, time, expired, onNext, isLast, questionIndex, total}) {
+  const correct = !expired && ca !== undefined && ca !== null && selected === ca;
+  const S = {mono:"'JetBrains Mono',monospace", serif:"'Playfair Display',serif"};
+  const pts = correct && time !== null ? calcPoints(time) : 0;
+
+  return (
+    <div style={{background:"#111113",border:`1px solid ${correct?"#1a3a2a":"#2a1a1a"}`,borderRadius:16,padding:24,animation:"fadeScale .4s ease both"}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
+        <div style={{width:48,height:48,borderRadius:14,background:correct?"linear-gradient(135deg,#064e2a,#0a6e3a)":"linear-gradient(135deg,#4e0606,#6e0a0a)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:24,animation:"badgePop .5s ease both"}}>
+          {correct ? "✓" : expired ? "⏱" : "✗"}
+        </div>
+        <div>
+          <div style={{fontFamily:S.serif,fontSize:18,color:correct?"#4ade80":"#f87171",fontWeight:700}}>
+            {correct ? "Correct!" : expired ? "Time Expired" : "Incorrect"}
+          </div>
+          <div style={{fontFamily:S.mono,fontSize:12,color:"#aaa"}}>
+            {expired ? "No answer given" : `Answered in ${time.toFixed(1)}s`}
+            {correct && time < 1 && " ⚡ Lightning!"}
+            {correct && time >= 1 && time < 5 && " ⚡"}
+          </div>
+        </div>
+        {correct && (
+          <div style={{marginLeft:"auto",background:"linear-gradient(135deg,#064e2a,#0a6e3a)",borderRadius:10,padding:"6px 14px",fontFamily:S.mono,fontSize:14,fontWeight:700,color:"#4ade80"}}>+{pts}</div>
+        )}
+      </div>
+      {!correct && ca !== undefined && ca !== null && q && q.options && (
+        <div style={{background:"#0d0d0f",borderRadius:10,padding:"12px 16px",marginBottom:16,border:"1px solid #1a3a2a"}}>
+          <span style={{color:"#aaa",fontFamily:S.mono,fontSize:11}}>Correct answer: </span>
+          <span style={{color:"#4ade80",fontFamily:S.mono,fontSize:13,fontWeight:600}}>{q.options[ca]}</span>
+        </div>
+      )}
+      <button onClick={onNext} style={{width:"100%",padding:16,borderRadius:12,border:"none",background:"linear-gradient(135deg,#e8e8e8,#d0d0d0)",color:"#000",fontFamily:S.mono,fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:1,cursor:"pointer"}}>
+        {isLast ? "See Results" : `Next Question → (${questionIndex+2}/${total})`}
+      </button>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// SCORING INFO MODAL
+// ═══════════════════════════════════════
+
+function ScoringModal({onClose}) {
+  const S = {mono:"'JetBrains Mono',monospace", serif:"'Playfair Display',serif"};
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.8)",backdropFilter:"blur(8px)",zIndex:150,display:"flex",alignItems:"center",justifyContent:"center",padding:20,animation:"fadeIn .3s ease"}} onClick={onClose}>
+      <div style={{background:"#111113",borderRadius:20,padding:28,width:"100%",maxWidth:400,border:"1px solid #2a2a2e",animation:"fadeScale .3s ease"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+          <h3 style={{fontFamily:S.serif,fontSize:20,color:"#fff",margin:0,fontWeight:700}}>How Scoring Works</h3>
+          <button onClick={onClose} style={{background:"none",border:"none",color:"#666",fontSize:22,cursor:"pointer",lineHeight:1}}>×</button>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:12}}>
+          {[
+            {range:"Under 1 second",pts:100,col:"#fbbf24",icon:"⚡"},
+            {range:"1 – 3 seconds",pts:"~80–93",col:"#4ade80",icon:"🚀"},
+            {range:"3 – 8 seconds",pts:"~47–80",col:"#60a5fa",icon:"✅"},
+            {range:"8 – 15 seconds",pts:"~0–47",col:"#f87171",icon:"🐢"},
+            {range:"Wrong / timeout",pts:0,col:"#555",icon:"✗"},
+          ].map(({range,pts,col,icon}) => (
+            <div key={range} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#0d0d0f",borderRadius:10,padding:"12px 14px",border:"1px solid #1a1a1e"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10}}>
+                <span style={{fontSize:18}}>{icon}</span>
+                <span style={{fontFamily:S.mono,fontSize:12,color:"#ccc"}}>{range}</span>
+              </div>
+              <span style={{fontFamily:S.mono,fontSize:13,fontWeight:700,color:col}}>{pts} pts</span>
+            </div>
+          ))}
+        </div>
+        <p style={{fontFamily:S.mono,fontSize:11,color:"#555",margin:"16px 0 0",textAlign:"center",lineHeight:1.6}}>
+          5 questions · Max {MAX_SCORE} points · Answer faster = score higher
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// SCOREBOARD
+// ═══════════════════════════════════════
+
+function Scoreboard({entries, myScore}) {
+  const S = {mono:"'JetBrains Mono',monospace", serif:"'Playfair Display',serif"};
+  if (!entries || entries.length === 0) return null;
+
+  return (
+    <div style={{background:"#0d0d0f",borderRadius:16,padding:20,marginTop:20,border:"1px solid #1a1a1e"}}>
+      <h3 style={{fontFamily:S.serif,fontSize:16,color:"#fff",margin:"0 0 14px",fontWeight:700,display:"flex",alignItems:"center",gap:8}}>
+        🏆 Today's Top Scores
+      </h3>
+      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {entries.map((entry, i) => {
+          const isMe = entry.score === myScore && i === entries.findIndex(e => e.score === myScore);
+          return (
+            <div key={i} style={{
+              display:"flex",alignItems:"center",gap:10,
+              padding:"10px 12px",borderRadius:10,
+              background: isMe ? "linear-gradient(135deg,#0a2a16,#0d3a1e)" : "#111113",
+              border: `1px solid ${isMe?"#1a5a30":"#1a1a1e"}`,
+              animation:`slideUp .3s ease ${i*0.05}s both`
+            }}>
+              <span style={{fontFamily:S.mono,fontSize:12,color:i===0?"#fbbf24":i===1?"#9ca3af":i===2?"#cd7c2f":"#444",fontWeight:700,width:20,textAlign:"center"}}>
+                {i===0?"🥇":i===1?"🥈":i===2?"🥉":`#${i+1}`}
+              </span>
+              <span style={{fontFamily:S.mono,fontSize:12,color:isMe?"#4ade80":"#ccc",flex:1,fontWeight:isMe?700:400}}>
+                {isMe?"You":entry.display_name||`Player ${i+1}`}
+              </span>
+              <span style={{fontFamily:S.mono,fontSize:13,fontWeight:700,color:isMe?"#4ade80":"#fff"}}>
+                {entry.score}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════
+// MAIN QUIZ COMPONENT
+// ═══════════════════════════════════════
+
+export default function Quiz() {
+  const [phase, setPhase] = useState("loading");
+  const [questions, setQuestions] = useState([]);
+  const [correctAnswers, setCorrectAnswers] = useState([]);
+  const [currentQ, setCurrentQ] = useState(0);
+  const [answers, setAnswers] = useState(Array(TOTAL_QUESTIONS).fill(null));
+  const [timings, setTimings] = useState(Array(TOTAL_QUESTIONS).fill(null));
+  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
+  const [result, setResult] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [badges, setBadges] = useState([]);
+  const [showBadges, setShowBadges] = useState(false);
+  const [showScoring, setShowScoring] = useState(false);
+  const [newBadge, setNewBadge] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const startRef = useRef(null);
+  const quizStartRef = useRef(null);
+  const timerRef = useRef(null);
+
+  // Init
+  useEffect(() => {
+    (async () => {
+      try {
+        await api.ensurePlayer();
+        const [quizData, statsData, todayData] = await Promise.all([
+          api.getTodayQuiz(), api.getPlayerStats(), api.getTodayResult()
+        ]);
+        setQuestions(quizData.questions || []);
+        setCorrectAnswers(quizData.correct_answers || []);
+        setStats(statsData);
+        setBadges(statsData.badges || []);
+
+        const numQ = (quizData.questions || []).length;
+        setAnswers(Array(numQ).fill(null));
+        setTimings(Array(numQ).fill(null));
+
+        if (todayData.played) {
+          const r = todayData.result;
+          // Build correct array dynamically for however many questions exist
+          const correctArr = [];
+          const keys = ["question_1","question_2","question_3","question_4","question_5"];
+          for (const k of keys) {
+            if (r[`${k}_correct`] !== undefined) correctArr.push(!!r[`${k}_correct`]);
+          }
+          setResult({
+            correct: correctArr,
+            correct_count: correctArr.filter(Boolean).length,
+            score: r.score,
+            total_time: r.total_time || 0,
+          });
+          // Fetch leaderboard
+          try {
+            const lb = await api.getLeaderboard();
+            setLeaderboard(lb.leaderboard || []);
+          } catch {}
+          setPhase("results");
+        } else {
+          setPhase("ready");
         }
-      };
+      } catch (err) {
+        setError(err.message);
+        setPhase("error");
+      }
+    })();
+  }, []);
 
-      return (
-        <div className="qr-panel">
-          <div className="qr-event-name">{eventName}</div>
-          <div className="qr-wrap">
-            <div ref={ref} id={id} />
-          </div>
-          <div className="qr-url">{url}</div>
-          <button className="btn-download" onClick={download}>⬇ Download QR Code</button>
-          <p style={{fontSize:11,color:"#999",textAlign:"center"}}>Share this QR with your event promoters</p>
-        </div>
-      );
+  // Timer
+  useEffect(() => {
+    if (phase !== "playing") return;
+    startRef.current = Date.now();
+    setTimeLeft(TIME_LIMIT);
+    timerRef.current = setInterval(() => {
+      const remaining = Math.max(0, TIME_LIMIT - (Date.now() - startRef.current) / 1000);
+      setTimeLeft(Math.ceil(remaining));
+      if (remaining <= 0) {
+        clearInterval(timerRef.current);
+        setTimings(p => { const n = [...p]; n[currentQ] = null; return n; });
+        setPhase("reveal");
+      }
+    }, 100);
+    return () => clearInterval(timerRef.current);
+  }, [phase, currentQ]);
+
+  const handleStart = () => { quizStartRef.current = Date.now(); setPhase("playing"); };
+
+  const handleAnswer = useCallback((i) => {
+    if (phase !== "playing") return;
+    clearInterval(timerRef.current);
+    const elapsed = (Date.now() - startRef.current) / 1000;
+    setAnswers(p => { const n = [...p]; n[currentQ] = i; return n; });
+    setTimings(p => { const n = [...p]; n[currentQ] = elapsed; return n; });
+    setPhase("reveal");
+  }, [phase, currentQ]);
+
+  const totalQ = questions.length || TOTAL_QUESTIONS;
+
+  const handleNext = async () => {
+    if (currentQ < totalQ - 1) {
+      setCurrentQ(p => p + 1);
+      setPhase("playing");
+    } else {
+      try {
+        const res = await api.submitQuiz(answers, timings, quizStartRef.current);
+        setResult(res);
+        setStats(res.player_stats);
+        setBadges(res.all_badges || []);
+        if (res.new_badges && res.new_badges.length > 0) {
+          setTimeout(() => setNewBadge(res.new_badges[0]), 1200);
+        }
+        // Fetch leaderboard after submit
+        try {
+          const lb = await api.getLeaderboard();
+          setLeaderboard(lb.leaderboard || []);
+        } catch {}
+        setPhase("results");
+      } catch (err) {
+        // Fallback: compute locally
+        const localCorrect = answers.map((a, i) => a === correctAnswers[i]);
+        const localScore = answers.reduce((acc, a, i) => {
+          if (a === correctAnswers[i] && timings[i] !== null) {
+            return acc + calcPoints(timings[i]);
+          }
+          return acc;
+        }, 0);
+        setResult({
+          correct: localCorrect,
+          correct_count: localCorrect.filter(Boolean).length,
+          score: localScore,
+          total_time: timings.reduce((a, t) => a + (t === null ? TIME_LIMIT : t), 0),
+        });
+        setPhase("results");
+      }
     }
+  };
 
-    // ── SMS Modal ──
-    function SMSModal({ reg, event, onClose }) {
-      const [sent, setSent] = useState(false);
-      const msg = `Hi ${reg.fullName.split(" ")[0]}! 🎉 Thank you for attending the ${event.name} SportPesa event. Complete your registration at https://www.sportpesa.co.za/join and make a deposit to stand a chance to win ${event.prize || "our Grand Prize"}! T&Cs apply. 18+`;
+  const getShareText = () => {
+    if (!result) return "";
+    return `I played QuiZa today and scored ${result.score}/${MAX_SCORE}. Can you do better?\n\nPlay Now → www.quiza.co.za`;
+  };
 
-      const handleSend = () => {
-        const regs = getRegs();
-        const idx = regs.findIndex(r => r.id === reg.id);
-        if (idx > -1) { regs[idx].smsSent = true; saveRegs(regs); }
-        setSent(true);
-        setTimeout(onClose, 1500);
-      };
+  const shareWhatsApp = () => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(getShareText())}`, "_blank");
+  };
+  const shareFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent("https://www.quiza.co.za")}&quote=${encodeURIComponent(getShareText())}`, "_blank");
+  };
+  const shareX = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(getShareText())}`, "_blank");
+  };
+  const handleCopy = async () => {
+    try { await navigator.clipboard.writeText(getShareText()); } catch (e) {}
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
 
-      return (
-        <div className="modal-overlay" onClick={onClose}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
-            <div className="modal-title">📱 Send Follow-Up SMS</div>
-            <div className="modal-sub">To: {reg.mobile} · {reg.fullName}</div>
-            <div className="sms-preview">{msg}</div>
-            {sent ? (
-              <p style={{color:"#1A3A6B",fontWeight:600,textAlign:"center"}}>✓ SMS marked as sent!</p>
-            ) : (
-              <div className="modal-actions">
-                <button className="btn-outline" onClick={onClose}>Cancel</button>
-                <button className="btn-primary" onClick={handleSend}>Send SMS</button>
-              </div>
-            )}
-          </div>
-        </div>
+  // Countdown
+  const [countdown, setCountdown] = useState("");
+  useEffect(() => {
+    if (phase !== "results") return;
+    const tick = () => {
+      const now = new Date();
+      const tom = new Date(now);
+      tom.setDate(tom.getDate() + 1);
+      tom.setHours(0, 0, 0, 0);
+      const d = tom - now;
+      setCountdown(
+        `${String(Math.floor(d/36e5)).padStart(2,"0")}:${String(Math.floor((d%36e5)/6e4)).padStart(2,"0")}:${String(Math.floor((d%6e4)/1e3)).padStart(2,"0")}`
       );
-    }
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [phase]);
 
-    // ── Admin App ──
-    function AdminApp({ user, onLogout }) {
-      const [tab, setTab] = useState("events");
-      const [events, setEvents] = useState(getEvents());
-      const [regs, setRegs] = useState(getRegs());
-      const [selectedEvent, setSelectedEvent] = useState(null);
-      const [form, setForm] = useState({ name: "", date: "", venue: "", details: "", prize: "" });
-      const [smsTarget, setSmsTarget] = useState(null);
+  const S = {mono:"'JetBrains Mono',monospace", serif:"'Playfair Display',serif"};
+  const unlockedCount = badges.filter(b => b.unlocked).length;
+  const q = questions[currentQ];
 
-      const refresh = () => { setEvents(getEvents()); setRegs(getRegs()); };
+  return (
+    <div style={{maxWidth:520,margin:"0 auto",padding:"24px 20px 48px",minHeight:"100vh",background:"#08080a",fontFamily:S.mono}}>
 
-      const createEvent = () => {
-        if (!form.name || !form.date) return;
-        const ev = {
-          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
-          ...form,
-          createdBy: user.email,
-          createdAt: new Date().toISOString(),
-        };
-        const updated = [...getEvents(), ev];
-        saveEvents(updated);
-        setEvents(updated);
-        setSelectedEvent(ev);
-        setForm({ name: "", date: "", venue: "", details: "", prize: "" });
-        setTab("events");
-      };
-
-      const deleteEvent = (id) => {
-        if (!window.confirm("Delete this event?")) return;
-        const updated = getEvents().filter(e => e.id !== id);
-        saveEvents(updated);
-        setEvents(updated);
-        if (selectedEvent?.id === id) setSelectedEvent(null);
-      };
-
-      const getRegUrl = (evId) => `${window.location.href.split("?")[0]}?event=${evId}`;
-      const eventRegs = (evId) => regs.filter(r => r.eventId === evId);
-      const smsSentCount = regs.filter(r => r.smsSent).length;
-
-      return (
-        <div className="app">
-          <nav className="nav">
-            <span className="nav-logo">Event<span>IQ</span></span>
-            <div className="nav-right">
-              <span className="nav-user">👤 {user.email}</span>
-              <button className="nav-btn" onClick={onLogout}>Log Out</button>
-            </div>
-          </nav>
-
-          <div className="main">
-            <div className="page-title">Event Dashboard</div>
-            <div className="page-sub">Manage events, QR codes and attendee registrations</div>
-
-            <div className="stats-row">
-              <div className="stat-card">
-                <div className="stat-num">{events.length}</div>
-                <div className="stat-label">Active Events</div>
-              </div>
-              <div className="stat-card navy">
-                <div className="stat-num">{regs.length}</div>
-                <div className="stat-label">Total Registrations</div>
-              </div>
-              <div className="stat-card gold">
-                <div className="stat-num">{smsSentCount}</div>
-                <div className="stat-label">SMS Sent</div>
-              </div>
-            </div>
-
-            <div className="tabs">
-              <button className={`tab ${tab === "events" ? "active" : ""}`} onClick={() => setTab("events")}>Events & QR Codes</button>
-              <button className={`tab ${tab === "registrations" ? "active" : ""}`} onClick={() => { setTab("registrations"); refresh(); }}>Registrations</button>
-              <button className={`tab ${tab === "create" ? "active" : ""}`} onClick={() => setTab("create")}>+ New Event</button>
-            </div>
-
-            {tab === "events" && (
-              <div className="two-col">
-                <div>
-                  <div className="card-title">Your Events</div>
-                  {events.length === 0 ? (
-                    <div className="card">
-                      <div className="empty">
-                        <div className="empty-icon">📅</div>
-                        <div className="empty-text">No events yet. Click "+ New Event" to get started.</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="event-list">
-                      {events.map(ev => (
-                        <div key={ev.id} className={`event-card ${selectedEvent?.id === ev.id ? "selected" : ""}`} onClick={() => setSelectedEvent(ev)}>
-                          <div>
-                            <div className="event-name">{ev.name}</div>
-                            <div className="event-meta">
-                              <span>📅 {new Date(ev.date + "T12:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "short", year: "numeric" })}</span>
-                              {ev.venue && <span>📍 {ev.venue}</span>}
-                            </div>
-                          </div>
-                          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                            <span className="reg-count">{eventRegs(ev.id).length} regs</span>
-                            <span className="event-badge">Active</span>
-                            <button className="del-btn" onClick={e => { e.stopPropagation(); deleteEvent(ev.id); }} title="Delete event">🗑</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div>
-                  {selectedEvent ? (
-                    <QRDisplay url={getRegUrl(selectedEvent.id)} eventName={selectedEvent.name} />
-                  ) : (
-                    <div className="card" style={{ textAlign: "center", padding: "48px 24px" }}>
-                      <div style={{ fontSize: 40, marginBottom: 12 }}>👆</div>
-                      <div style={{ fontSize: 14, color: "var(--muted)" }}>Select an event to view its QR code</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {tab === "create" && (
-              <div className="card">
-                <div className="card-title">Create New Event</div>
-                <div className="form-grid">
-                  <div className="field">
-                    <label>Event Name *</label>
-                    <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. PSL Matchday Activation" />
-                  </div>
-                  <div className="field">
-                    <label>Event Date *</label>
-                    <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} />
-                  </div>
-                  <div className="field">
-                    <label>Venue</label>
-                    <input value={form.venue} onChange={e => setForm({ ...form, venue: e.target.value })} placeholder="e.g. FNB Stadium, Johannesburg" />
-                  </div>
-                  <div className="field">
-                    <label>Grand Prize (for SMS follow-up)</label>
-                    <input value={form.prize} onChange={e => setForm({ ...form, prize: e.target.value })} placeholder="e.g. a R10,000 cash prize" />
-                  </div>
-                  <div className="field form-full">
-                    <label>Event Details</label>
-                    <textarea rows={3} value={form.details} onChange={e => setForm({ ...form, details: e.target.value })} placeholder="Additional context shown to attendees during registration..." />
-                  </div>
-                </div>
-                <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-                  <button className="btn-primary" onClick={createEvent} disabled={!form.name || !form.date}>Create Event & Generate QR</button>
-                  <button className="btn-outline" onClick={() => { setTab("events"); setForm({ name: "", date: "", venue: "", details: "", prize: "" }); }}>Cancel</button>
-                </div>
-              </div>
-            )}
-
-            {tab === "registrations" && (
-              <div className="card">
-                <div className="card-title">All Registrations</div>
-                {regs.length === 0 ? (
-                  <div className="empty">
-                    <div className="empty-icon">📋</div>
-                    <div className="empty-text">No registrations yet. Share your event QR codes to start capturing leads.</div>
-                  </div>
-                ) : (
-                  <div style={{ overflowX: "auto" }}>
-                    <table className="reg-table">
-                      <thead>
-                        <tr>
-                          <th>Full Name</th>
-                          <th>Mobile</th>
-                          <th>Event</th>
-                          <th>Registered</th>
-                          <th>Marketing</th>
-                          <th>SMS</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {[...regs].reverse().map(r => {
-                          const ev = events.find(e => e.id === r.eventId);
-                          return (
-                            <tr key={r.id}>
-                              <td style={{ fontWeight: 500 }}>{r.fullName}</td>
-                              <td>{r.mobile}</td>
-                              <td>{ev?.name || "—"}</td>
-                              <td style={{ color: "var(--muted)", fontSize: 13 }}>
-                                {new Date(r.createdAt).toLocaleString("en-ZA", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                              </td>
-                              <td style={{ fontSize: 13 }}>{r.marketingOptIn ? "✓ Yes" : "—"}</td>
-                              <td>
-                                <span className={`sms-badge ${r.smsSent ? "sent" : "pending"}`}>
-                                  {r.smsSent ? "✓ Sent" : "⏳ Pending"}
-                                </span>
-                              </td>
-                              <td>
-                                {!r.smsSent && ev && (
-                                  <button style={{ background: "none", border: "none", color: "#1A3A6B", cursor: "pointer", fontSize: 13, fontWeight: 600 }} onClick={() => setSmsTarget({ reg: r, event: ev })}>
-                                    Send SMS
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {smsTarget && (
-            <SMSModal
-              reg={smsTarget.reg}
-              event={smsTarget.event}
-              onClose={() => { setSmsTarget(null); refresh(); }}
-            />
-          )}
+      {/* Header — clickable logo */}
+      <div style={{textAlign:"center",marginBottom:24,animation:"slideUp .4s ease both"}}>
+        <div
+          onClick={() => { if (phase === "results" || phase === "ready") window.location.href = "/"; }}
+          style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:4,cursor:phase==="results"||phase==="ready"?"pointer":"default"}}
+        >
+          <span style={{fontSize:28}}>🇿🇦</span>
+          <h1 style={{fontFamily:S.serif,fontSize:32,fontWeight:800,color:"#fff",margin:0,letterSpacing:-.5}}>
+            Qui<span style={{color:"#22c55e"}}>Za</span>
+          </h1>
         </div>
-      );
-    }
+        <p style={{color:"#888",fontSize:11,margin:0,textTransform:"uppercase",letterSpacing:3}}>
+          Daily Sports Trivia · {TIME_LIMIT}s per question
+        </p>
+      </div>
 
-    // ── Attendee Page ──
-    function AttendeePage({ eventId }) {
-      const events = getEvents();
-      const event = events.find(e => e.id === eventId);
-      const [form, setForm] = useState({ fullName: "", mobile: "" });
-      const [checks, setChecks] = useState({ age: false, tcs: false, marketing: false });
-      const [submitted, setSubmitted] = useState(false);
-      const [error, setError] = useState("");
-
-      const canSubmit = form.fullName.trim() && form.mobile.trim().length >= 10 && checks.age && checks.tcs;
-
-      const handleSubmit = () => {
-        if (!canSubmit) { setError("Please fill in all fields and accept the required terms."); return; }
-        const reg = {
-          id: Date.now().toString(36),
-          eventId,
-          fullName: form.fullName.trim(),
-          mobile: form.mobile.trim(),
-          marketingOptIn: checks.marketing,
-          createdAt: new Date().toISOString(),
-          smsSent: false,
-        };
-        saveRegs([...getRegs(), reg]);
-        setSubmitted(true);
-      };
-
-      if (!event) return (
-        <div className="attend-page">
-          <div className="attend-card" style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>⚠️</div>
-            <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>Event Not Found</div>
-            <div style={{ fontSize: 14, color: "var(--muted)" }}>This QR code may be invalid or the event has ended.</div>
-          </div>
-        </div>
-      );
-
-      if (submitted) return (
-        <div className="success-page">
-          <div className="success-card">
-            <div className="success-icon">🎉</div>
-            <div className="success-title">You're In!</div>
-            <div className="success-msg">
-              Thank you, <strong>{form.fullName.split(" ")[0]}</strong>! Your details have been captured. You'll receive an SMS with instructions to complete your SportPesa registration.
-            </div>
-            {event.prize && (
-              <div className="success-prize">
-                <div className="success-prize-label">🏆 Grand Prize</div>
-                <div className="success-prize-text">
-                  Complete your registration at sportpesa.co.za and make a deposit to stand a chance to win <strong>{event.prize}</strong>!
-                </div>
+      {/* Stats bar */}
+      {stats && (
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 0",marginBottom:8,animation:"slideUp .4s ease .1s both"}}>
+          <div style={{display:"flex",gap:20}}>
+            {[
+              {l:"Streak", v:stats.streak, i:"🔥"},
+              {l:"Played", v:stats.total_games, i:"📅"},
+              {l:"Avg Pts", v:stats.avg_score || 0, i:"📊"},
+            ].map(s => (
+              <div key={s.l} style={{textAlign:"center"}}>
+                <div style={{fontSize:18,color:"#fff",fontWeight:700}}>{s.i} {s.v}</div>
+                <div style={{fontSize:10,color:"#888",textTransform:"uppercase",letterSpacing:.5}}>{s.l}</div>
               </div>
-            )}
-            <div style={{ marginTop: 20, fontSize: 13, color: "var(--muted)" }}>You may now collect your merchandise from the promoter 🙌</div>
+            ))}
           </div>
+          <button onClick={() => setShowBadges(true)} style={{background:"#1a1a1e",border:"1px solid #2a2a2e",borderRadius:100,padding:"8px 16px",color:"#ccc",fontSize:12,display:"flex",alignItems:"center",gap:6,cursor:"pointer"}}>
+            🏅 {unlockedCount}/{badges.length}
+          </button>
         </div>
-      );
+      )}
+      <div style={{height:1,background:"linear-gradient(90deg,transparent,#222,transparent)",margin:"8px 0 24px"}}/>
 
-      return (
-        <div className="attend-page">
-          <div className="attend-card">
-            <div className="attend-brand">Sport<span>Pesa</span></div>
-            <div style={{ textAlign: "center", fontSize: 11, color: "var(--muted)", marginBottom: 4, letterSpacing: 1 }}>POWERED BY EVENTIQ</div>
+      {/* === LOADING === */}
+      {phase === "loading" && (
+        <div style={{textAlign:"center",padding:"80px 0"}}>
+          <div style={{fontSize:40,animation:"spin 1s linear infinite",display:"inline-block"}}>⚽</div>
+          <p style={{color:"#888",marginTop:16,fontSize:13}}>Loading today's quiz...</p>
+        </div>
+      )}
 
-            <div className="attend-event">
-              <div className="attend-event-name">{event.name}</div>
-              <div className="attend-event-meta">
-                📅 {new Date(event.date + "T12:00:00").toLocaleDateString("en-ZA", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                {event.venue && <span> · 📍 {event.venue}</span>}
-              </div>
-            </div>
+      {/* === ERROR === */}
+      {phase === "error" && (
+        <div style={{textAlign:"center",padding:"60px 0",animation:"fadeScale .5s ease both"}}>
+          <div style={{fontSize:48,marginBottom:16}}>😔</div>
+          <h2 style={{fontFamily:S.serif,fontSize:22,color:"#fff",margin:"0 0 8px",fontWeight:700}}>Eish!</h2>
+          <p style={{color:"#888",fontSize:13,maxWidth:320,margin:"0 auto"}}>{error === "Invalid player token" ? "Your session expired. Tap Try Again to start fresh!" : (error || "Something went wrong. Try refreshing.")}</p>
+          <button onClick={() => window.location.reload()} style={{marginTop:24,background:"#1a1a1e",border:"1px solid #2a2a2e",borderRadius:100,padding:"12px 32px",color:"#ccc",fontSize:13,fontWeight:600,cursor:"pointer"}}>
+            Try Again
+          </button>
+        </div>
+      )}
 
-            <p className="attend-intro">Register your interest in joining SportPesa and stand a chance to win exciting prizes. Takes less than 30 seconds!</p>
-
-            {error && <div className="login-err">{error}</div>}
-
-            <label className="attend-label">Full Name</label>
-            <input className="attend-input" placeholder="e.g. Thabo Nkosi" value={form.fullName} onChange={e => setForm({ ...form, fullName: e.target.value })} />
-
-            <label className="attend-label">Mobile Number</label>
-            <input className="attend-input" placeholder="e.g. 0821234567" type="tel" value={form.mobile} onChange={e => setForm({ ...form, mobile: e.target.value })} />
-
-            <label className="check-row">
-              <input type="checkbox" checked={checks.age} onChange={e => setChecks({ ...checks, age: e.target.checked })} />
-              <span>I confirm I am <strong>18 years of age or older</strong> *</span>
-            </label>
-            <label className="check-row">
-              <input type="checkbox" checked={checks.tcs} onChange={e => setChecks({ ...checks, tcs: e.target.checked })} />
-              <span>I accept the <strong>SportPesa Terms & Conditions</strong> *</span>
-            </label>
-            <label className="check-row">
-              <input type="checkbox" checked={checks.marketing} onChange={e => setChecks({ ...checks, marketing: e.target.checked })} />
-              <span>I agree to receive <strong>marketing communications</strong> from SportPesa (optional)</span>
-            </label>
-
-            <button className="attend-btn" onClick={handleSubmit} disabled={!canSubmit}>
-              Register My Interest →
-            </button>
-
-            <p style={{ fontSize: 11, color: "var(--muted)", textAlign: "center", marginTop: 16, lineHeight: 1.5 }}>
-              Your details are used only for SportPesa registration follow-up. 18+ only. Please gamble responsibly.
+      {/* === READY === */}
+      {phase === "ready" && questions.length > 0 && (
+        <div style={{textAlign:"center",padding:"40px 0",animation:"fadeScale .5s ease both"}}>
+          <div style={{fontSize:64,marginBottom:16}}>⚡</div>
+          <h2 style={{fontFamily:S.serif,fontSize:24,color:"#fff",margin:"0 0 12px",fontWeight:700}}>Ready?</h2>
+          <p style={{color:"#fff",fontSize:13,lineHeight:1.7,margin:"0 0 8px",maxWidth:320,marginLeft:"auto",marginRight:"auto"}}>
+            {totalQ} questions · {TIME_LIMIT} seconds each.
+          </p>
+          {/* Timer warning — clear and prominent */}
+          <div style={{background:"#1a1a0a",border:"1px solid #4e3a06",borderRadius:12,padding:"12px 20px",margin:"12px auto 8px",maxWidth:320,display:"flex",alignItems:"center",gap:10}}>
+            <span style={{fontSize:20}}>⏱️</span>
+            <p style={{color:"#fbbf24",fontSize:12,lineHeight:1.6,margin:0,textAlign:"left"}}>
+              <strong>The clock starts immediately.</strong> Answer fast — the quicker you answer correctly, the more points you earn. Max {MAX_SCORE} points total.
             </p>
           </div>
+          <button
+            onClick={() => setShowScoring(true)}
+            style={{background:"none",border:"none",color:"#60a5fa",fontSize:12,cursor:"pointer",textDecoration:"underline",margin:"0 0 24px",padding:"8px 0",display:"block",width:"100%"}}
+          >
+            ℹ️ How does scoring work?
+          </button>
+          <button onClick={handleStart} style={{background:"linear-gradient(135deg,#22c55e,#16a34a)",color:"#fff",border:"none",borderRadius:100,padding:"18px 64px",fontSize:15,fontWeight:700,textTransform:"uppercase",letterSpacing:1,cursor:"pointer"}}>
+            Start Quiz
+          </button>
         </div>
-      );
-    }
+      )}
 
-    // ── Login Page ──
-    function LoginPage({ onLogin }) {
-      const [email, setEmail] = useState("");
-      const [mobile, setMobile] = useState("");
-      const [error, setError] = useState("");
+      {/* === PLAYING === */}
+      {phase === "playing" && q && (
+        <ActiveQuestion question={q} qi={currentQ} total={totalQ} onAnswer={handleAnswer} timeLeft={timeLeft} max={TIME_LIMIT}/>
+      )}
 
-      const handleLogin = () => {
-        const match = AUTHORIZED_USERS.find(
-          u => u.email.toLowerCase() === email.toLowerCase().trim() && u.mobile === mobile.trim()
-        );
-        if (match) { onLogin({ email: match.email }); }
-        else { setError("Invalid credentials. Please check your email and mobile number."); }
-      };
+      {/* === REVEAL === */}
+      {phase === "reveal" && q && (
+        <AnswerReveal
+          question={q}
+          correctAnswer={correctAnswers[currentQ]}
+          selected={answers[currentQ]}
+          time={timings[currentQ]}
+          expired={timings[currentQ] === null}
+          onNext={handleNext}
+          isLast={currentQ === totalQ - 1}
+          questionIndex={currentQ}
+          total={totalQ}
+        />
+      )}
 
-      return (
-        <div className="login-page">
-          <div className="login-card">
-            <div className="login-logo">Event<span>IQ</span></div>
-            <div className="login-sub">SPORTPESA EVENT MANAGEMENT PLATFORM</div>
-            {error && <div className="login-err">{error}</div>}
-            <label className="login-label">Email Address</label>
-            <input className="login-input" type="email" placeholder="you@sportpesa.co.za" value={email} onChange={e => { setEmail(e.target.value); setError(""); }} onKeyDown={e => e.key === "Enter" && handleLogin()} />
-            <label className="login-label">Mobile Number</label>
-            <input className="login-input" type="tel" placeholder="e.g. 0821234567" value={mobile} onChange={e => { setMobile(e.target.value); setError(""); }} onKeyDown={e => e.key === "Enter" && handleLogin()} />
-            <button className="login-btn" onClick={handleLogin}>Sign In</button>
-            <p style={{ textAlign: "center", fontSize: 12, color: "#aaa", marginTop: 20 }}>Access restricted to authorised SportPesa team members only</p>
+      {/* === RESULTS === */}
+      {phase === "results" && result && (
+        <>
+          <div style={{background:"linear-gradient(135deg,#0a0a0c,#111118)",border:"1px solid #222",borderRadius:20,padding:32,textAlign:"center",animation:"fadeScale .6s ease both",marginTop:16}}>
+            <div style={{fontSize:48,marginBottom:8}}>
+              {result.correct_count === totalQ ? "🏆" : result.correct_count >= totalQ*0.8 ? "💪" : result.correct_count >= totalQ*0.4 ? "🤔" : "😅"}
+            </div>
+            <h2 style={{fontFamily:S.serif,fontSize:28,color:"#fff",margin:"0 0 4px",fontWeight:700}}>
+              {result.correct_count === totalQ ? "Perfect!" : result.correct_count >= totalQ*0.8 ? "Lekker!" : result.correct_count >= totalQ*0.4 ? "Not Bad" : "Better Luck Tomorrow"}
+            </h2>
+            <p style={{color:"#888",fontSize:13,margin:"0 0 24px"}}>
+              {result.correct_count}/{totalQ} correct · {result.score} points
+            </p>
+
+            {/* Score breakdown */}
+            {questions.length > 0 && result.correct && result.correct.map((isCorrect, i) => (
+              <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 16px",background:"#0d0d0f",borderRadius:12,marginBottom:8,border:`1px solid ${isCorrect?"#1a3a2a":"#2a1a1a"}`,animation:`slideUp .4s ease ${i*.1}s both`,textAlign:"left"}}>
+                <span style={{fontSize:20}}>{isCorrect ? "🟩" : "🟥"}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:11,color:"#888",textTransform:"uppercase",letterSpacing:.5}}>
+                    Question {i+1}
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            {/* Share preview */}
+            <div style={{background:"#0a0a0c",borderRadius:12,padding:20,margin:"20px 0 24px",border:"1px solid #1a1a1e"}}>
+              <pre style={{fontFamily:S.mono,fontSize:13,color:"#ccc",margin:0,whiteSpace:"pre-wrap",lineHeight:1.8,textAlign:"center"}}>
+{`I played QuiZa today and scored ${result.score}/${MAX_SCORE}. Can you do better?
+
+Play Now → quiza.co.za`}
+              </pre>
+            </div>
+
+            <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
+              <button onClick={shareWhatsApp} style={{background:"#25D366",color:"#fff",border:"none",borderRadius:100,padding:"14px 24px",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8,letterSpacing:.3}}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.466A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.19-.593-5.925-1.628l-.425-.253-2.742.87.884-2.665-.277-.44A9.777 9.777 0 012.182 12c0-5.422 4.396-9.818 9.818-9.818 5.422 0 9.818 4.396 9.818 9.818 0 5.422-4.396 9.818-9.818 9.818z"/></svg>
+                WhatsApp
+              </button>
+              <button onClick={shareX} style={{background:"#000",color:"#fff",border:"1px solid #333",borderRadius:100,padding:"14px 24px",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8,letterSpacing:.3}}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                X
+              </button>
+              <button onClick={shareFacebook} style={{background:"#1877F2",color:"#fff",border:"none",borderRadius:100,padding:"14px 24px",fontSize:13,fontWeight:700,cursor:"pointer",display:"flex",alignItems:"center",gap:8,letterSpacing:.3}}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                Facebook
+              </button>
+            </div>
+            <button onClick={handleCopy} style={{background:"none",color:"#888",border:"none",padding:"12px",fontSize:12,cursor:"pointer",marginTop:8,textDecoration:copied?"none":"underline",transition:"all .3s"}}>
+              {copied ? "✓ Copied to clipboard!" : "Or copy to clipboard"}
+            </button>
+          </div>
+
+          {/* Scoreboard */}
+          <Scoreboard entries={leaderboard} myScore={result.score} />
+
+          {/* Countdown */}
+          <div style={{textAlign:"center",marginTop:24}}>
+            <p style={{color:"#888",fontSize:12,margin:"0 0 6px",textTransform:"uppercase",letterSpacing:1}}>Next quiz in</p>
+            <p style={{fontFamily:S.serif,fontSize:32,color:"#fff",margin:0,fontWeight:700,letterSpacing:4}}>{countdown}</p>
+          </div>
+        </>
+      )}
+
+      {/* === BADGE DRAWER === */}
+      {showBadges && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.7)",backdropFilter:"blur(8px)",zIndex:100,display:"flex",alignItems:"flex-end",justifyContent:"center",animation:"fadeIn .3s ease"}} onClick={() => setShowBadges(false)}>
+          <div style={{background:"#111113",borderRadius:"24px 24px 0 0",padding:"32px 24px 48px",width:"100%",maxWidth:480,maxHeight:"70vh",overflowY:"auto",animation:"slideUp .4s ease"}} onClick={e => e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
+              <h3 style={{fontFamily:S.serif,fontSize:22,color:"#fff",margin:0,fontWeight:700}}>Badges</h3>
+              <button onClick={() => setShowBadges(false)} style={{background:"none",border:"none",color:"#666",fontSize:24,cursor:"pointer"}}>×</button>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+              {badges.map(b => (
+                <div key={b.id} style={{background:b.unlocked?"#1a1a1e":"#0a0a0c",border:`1px solid ${b.unlocked?"#333":"#1a1a1e"}`,borderRadius:16,padding:"20px 16px",textAlign:"center",opacity:b.unlocked?1:.4}}>
+                  <div style={{fontSize:32,marginBottom:8,filter:b.unlocked?"none":"grayscale(1)"}}>{b.icon}</div>
+                  <div style={{fontSize:12,color:b.unlocked?"#e8e8e8":"#888",fontWeight:700,marginBottom:4}}>{b.name}</div>
+                  <div style={{fontSize:10,color:"#555"}}>{b.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      );
-    }
+      )}
 
-    // ── Root ──
-    function EventIQ() {
-      const [user, setUser] = useState(() => {
-        try { return JSON.parse(sessionStorage.getItem("eq_user")); } catch { return null; }
-      });
+      {/* === NEW BADGE TOAST === */}
+      {newBadge && (
+        <div style={{position:"fixed",top:24,left:"50%",transform:"translateX(-50%)",background:"linear-gradient(135deg,#1a1a1e,#222)",border:"1px solid #333",borderRadius:16,padding:"20px 28px",display:"flex",alignItems:"center",gap:14,zIndex:200,animation:"badgePop .5s ease both",boxShadow:"0 20px 60px rgba(0,0,0,.5)"}}>
+          <span style={{fontSize:36}}>{newBadge.icon}</span>
+          <div>
+            <div style={{color:"#fbbf24",fontSize:10,textTransform:"uppercase",letterSpacing:1,marginBottom:4}}>Badge Unlocked!</div>
+            <div style={{color:"#fff",fontSize:16,fontFamily:S.serif,fontWeight:700}}>{newBadge.name}</div>
+          </div>
+          <button onClick={() => setNewBadge(null)} style={{background:"none",border:"none",color:"#555",fontSize:18,marginLeft:8,cursor:"pointer"}}>×</button>
+        </div>
+      )}
 
-      const params = new URLSearchParams(window.location.search);
-      const eventParam = params.get("event");
-
-      const handleLogin = (u) => { sessionStorage.setItem("eq_user", JSON.stringify(u)); setUser(u); };
-      const handleLogout = () => { sessionStorage.removeItem("eq_user"); setUser(null); };
-
-      if (eventParam) return <AttendeePage eventId={eventParam} />;
-      if (user) return <AdminApp user={user} onLogout={handleLogout} />;
-      return <LoginPage onLogin={handleLogin} />;
-    }
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<EventIQ />);
-  </script>
-</body>
-</html>
+      {/* === SCORING MODAL === */}
+      {showScoring && <ScoringModal onClose={() => setShowScoring(false)} />}
+    </div>
+  );
+}
